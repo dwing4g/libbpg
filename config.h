@@ -8,10 +8,10 @@
 #define AVCONV_DATADIR "/usr/local/share/ffmpeg"
 #define CC_IDENT "gcc 4.7.2 (GCC) 20120921 (Red Hat 4.7.2-2)"
 #define av_restrict restrict
-#define EXTERN_PREFIX ""
+#define EXTERN_PREFIX "_"
 #define EXTERN_ASM 
 #define BUILDSUF ""
-#define SLIBSUF ".so"
+#define SLIBSUF ".dll"
 #define HAVE_MMX2 HAVE_MMXEXT
 #define SWS_MAX_FILTER_SIZE 256
 #define ARCH_AARCH64 0
@@ -35,9 +35,9 @@
 #define ARCH_TILEGX 0
 #define ARCH_TILEPRO 0
 #define ARCH_TOMI 0
-#define ARCH_X86 0
-#define ARCH_X86_32 0
-#define ARCH_X86_64 0
+// #define ARCH_X86 0
+// #define ARCH_X86_32 0
+// #define ARCH_X86_64 0
 #define HAVE_ARMV5TE 0
 #define HAVE_ARMV6 0
 #define HAVE_ARMV6T2 0
@@ -281,7 +281,7 @@
 #define HAVE_SLEEP 0
 #define HAVE_STRERROR_R 1
 #define HAVE_SYSCONF 1
-#define HAVE_SYSCTL 1
+#define HAVE_SYSCTL 0 // 1
 #define HAVE_USLEEP 1
 #define HAVE_VIRTUALALLOC 0
 #define HAVE_WGLGETPROCADDRESS 0
@@ -1830,5 +1830,7 @@
 //#define USE_AV_LOG /* include av_log() */
 #define USE_FRAME_DURATION_SEI /* for animations */
 //#define USE_BIPRED /* allow bi-prediction */
+
+#define AV_GCC_VERSION_AT_MOST(x,y)  (__GNUC__ < (x) || __GNUC__ == (x) && __GNUC_MINOR__ <= (y))
 
 #endif /* FFMPEG_CONFIG_H */
