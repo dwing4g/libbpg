@@ -30,7 +30,7 @@
 #endif
 #include <sched.h>
 #endif
-#if HAVE_GETPROCESSAFFINITYMASK || HAVE_WINRT
+#if HAVE_GETPROCESSAFFINITYMASK
 #include <windows.h>
 #endif
 #if HAVE_SYSCTL
@@ -97,7 +97,7 @@ void av_set_cpu_flags_mask(int mask)
     flags         = av_get_cpu_flags() & mask;
     checked       = 1;
 }
-
+/*d
 int av_parse_cpu_flags(const char *s)
 {
 #define CPUFLAG_MMXEXT   (AV_CPU_FLAG_MMX      | AV_CPU_FLAG_MMXEXT | AV_CPU_FLAG_CMOV)
@@ -118,7 +118,6 @@ int av_parse_cpu_flags(const char *s)
 #define CPUFLAG_FMA4     (AV_CPU_FLAG_FMA4     | CPUFLAG_AVX)
 #define CPUFLAG_AVX2     (AV_CPU_FLAG_AVX2     | CPUFLAG_AVX)
 #define CPUFLAG_BMI2     (AV_CPU_FLAG_BMI2     | AV_CPU_FLAG_BMI1)
-#define CPUFLAG_AESNI    (AV_CPU_FLAG_AESNI    | CPUFLAG_SSE42)
     static const AVOption cpuflags_opts[] = {
         { "flags"   , NULL, 0, AV_OPT_TYPE_FLAGS, { .i64 = 0 }, INT64_MIN, INT64_MAX, .unit = "flags" },
 #if   ARCH_PPC
@@ -146,13 +145,11 @@ int av_parse_cpu_flags(const char *s)
         { "3dnow"   , NULL, 0, AV_OPT_TYPE_CONST, { .i64 = CPUFLAG_3DNOW        },    .unit = "flags" },
         { "3dnowext", NULL, 0, AV_OPT_TYPE_CONST, { .i64 = CPUFLAG_3DNOWEXT     },    .unit = "flags" },
         { "cmov",     NULL, 0, AV_OPT_TYPE_CONST, { .i64 = AV_CPU_FLAG_CMOV     },    .unit = "flags" },
-        { "aesni"   , NULL, 0, AV_OPT_TYPE_CONST, { .i64 = CPUFLAG_AESNI        },    .unit = "flags" },
 #elif ARCH_ARM
         { "armv5te",  NULL, 0, AV_OPT_TYPE_CONST, { .i64 = AV_CPU_FLAG_ARMV5TE  },    .unit = "flags" },
         { "armv6",    NULL, 0, AV_OPT_TYPE_CONST, { .i64 = AV_CPU_FLAG_ARMV6    },    .unit = "flags" },
         { "armv6t2",  NULL, 0, AV_OPT_TYPE_CONST, { .i64 = AV_CPU_FLAG_ARMV6T2  },    .unit = "flags" },
         { "vfp",      NULL, 0, AV_OPT_TYPE_CONST, { .i64 = AV_CPU_FLAG_VFP      },    .unit = "flags" },
-        { "vfp_vm",   NULL, 0, AV_OPT_TYPE_CONST, { .i64 = AV_CPU_FLAG_VFP_VM   },    .unit = "flags" },
         { "vfpv3",    NULL, 0, AV_OPT_TYPE_CONST, { .i64 = AV_CPU_FLAG_VFPV3    },    .unit = "flags" },
         { "neon",     NULL, 0, AV_OPT_TYPE_CONST, { .i64 = AV_CPU_FLAG_NEON     },    .unit = "flags" },
 #elif ARCH_AARCH64
@@ -208,7 +205,6 @@ int av_parse_cpu_caps(unsigned *flags, const char *s)
         { "3dnow"   , NULL, 0, AV_OPT_TYPE_CONST, { .i64 = AV_CPU_FLAG_3DNOW    },    .unit = "flags" },
         { "3dnowext", NULL, 0, AV_OPT_TYPE_CONST, { .i64 = AV_CPU_FLAG_3DNOWEXT },    .unit = "flags" },
         { "cmov",     NULL, 0, AV_OPT_TYPE_CONST, { .i64 = AV_CPU_FLAG_CMOV     },    .unit = "flags" },
-        { "aesni",    NULL, 0, AV_OPT_TYPE_CONST, { .i64 = AV_CPU_FLAG_AESNI    },    .unit = "flags" },
 
 #define CPU_FLAG_P2 AV_CPU_FLAG_CMOV | AV_CPU_FLAG_MMX
 #define CPU_FLAG_P3 CPU_FLAG_P2 | AV_CPU_FLAG_MMX2 | AV_CPU_FLAG_SSE
@@ -231,7 +227,6 @@ int av_parse_cpu_caps(unsigned *flags, const char *s)
         { "armv6",    NULL, 0, AV_OPT_TYPE_CONST, { .i64 = AV_CPU_FLAG_ARMV6    },    .unit = "flags" },
         { "armv6t2",  NULL, 0, AV_OPT_TYPE_CONST, { .i64 = AV_CPU_FLAG_ARMV6T2  },    .unit = "flags" },
         { "vfp",      NULL, 0, AV_OPT_TYPE_CONST, { .i64 = AV_CPU_FLAG_VFP      },    .unit = "flags" },
-        { "vfp_vm",   NULL, 0, AV_OPT_TYPE_CONST, { .i64 = AV_CPU_FLAG_VFP_VM   },    .unit = "flags" },
         { "vfpv3",    NULL, 0, AV_OPT_TYPE_CONST, { .i64 = AV_CPU_FLAG_VFPV3    },    .unit = "flags" },
         { "neon",     NULL, 0, AV_OPT_TYPE_CONST, { .i64 = AV_CPU_FLAG_NEON     },    .unit = "flags" },
         { "setend",   NULL, 0, AV_OPT_TYPE_CONST, { .i64 = AV_CPU_FLAG_SETEND   },    .unit = "flags" },
@@ -252,15 +247,12 @@ int av_parse_cpu_caps(unsigned *flags, const char *s)
 
     return av_opt_eval_flags(&pclass, &cpuflags_opts[0], s, flags);
 }
-
+*/
 int av_cpu_count(void)
 {
     static volatile int printed;
 
     int nb_cpus = 1;
-#if HAVE_WINRT
-    SYSTEM_INFO sysinfo;
-#endif
 #if HAVE_SCHED_GETAFFINITY && defined(CPU_COUNT)
     cpu_set_t cpuset;
 
@@ -282,9 +274,6 @@ int av_cpu_count(void)
     nb_cpus = sysconf(_SC_NPROC_ONLN);
 #elif HAVE_SYSCONF && defined(_SC_NPROCESSORS_ONLN)
     nb_cpus = sysconf(_SC_NPROCESSORS_ONLN);
-#elif HAVE_WINRT
-    GetNativeSystemInfo(&sysinfo);
-    nb_cpus = sysinfo.dwNumberOfProcessors;
 #endif
 
     if (!printed) {
@@ -317,7 +306,6 @@ static const struct {
     { AV_CPU_FLAG_ARMV6,     "armv6"      },
     { AV_CPU_FLAG_ARMV6T2,   "armv6t2"    },
     { AV_CPU_FLAG_VFP,       "vfp"        },
-    { AV_CPU_FLAG_VFP_VM,    "vfp_vm"     },
     { AV_CPU_FLAG_VFPV3,     "vfpv3"      },
     { AV_CPU_FLAG_NEON,      "neon"       },
     { AV_CPU_FLAG_SETEND,    "setend"     },
@@ -346,7 +334,6 @@ static const struct {
     { AV_CPU_FLAG_AVX2,      "avx2"       },
     { AV_CPU_FLAG_BMI1,      "bmi1"       },
     { AV_CPU_FLAG_BMI2,      "bmi2"       },
-    { AV_CPU_FLAG_AESNI,     "aesni"      },
 #endif
     { 0 }
 };
