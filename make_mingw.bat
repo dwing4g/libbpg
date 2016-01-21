@@ -36,12 +36,14 @@ set FFMA_FILES= ^
     libavutil\x86\cpuid.asm ^
     libavcodec\x86\hevc_deblock.asm ^
     libavcodec\x86\hevc_idct.asm ^
+    libavcodec\x86\hevc_mc.asm ^
     libavcodec\x86\hevc_res_add.asm
 
 set FFMO_FILES= ^
     cpuid.obj ^
     hevc_deblock.obj ^
     hevc_idct.obj ^
+    hevc_mc.obj ^
     hevc_res_add.obj
 
 set DEC_FILES= ^
@@ -52,22 +54,25 @@ set CL_FLAGS=-DHAVE_AV_CONFIG_H -DCONFIG_BPG_VERSION=\^"0.9.6-dwing\^" -D__USE_M
 set CL_32=i686-w64-mingw32-gcc.exe -m32 -march=i686 %CL_FLAGS% -flto -fwhole-program
 set CL_64=x86_64-w64-mingw32-gcc.exe -m64 %CL_FLAGS%
 
-echo building bpgdec ...
+echo building bpgdec.exe ...
 rem %CL_32% -DARCH_X86=0 -DARCH_X86_32=0 -DARCH_X86_64=0 -o bpgdec.exe %FFMC_FILES% %DEC_FILES%
 
-echo building bpgdec_x86 ...
+echo building bpgdec_x86.exe ...
 set YASM_PARAMS=yasm -DARCH_X86=1 -DARCH_X86_32=1 -DARCH_X86_64=0 -I. --prefix=_ -a x86 -m x86 -f win32 -P config.asm
-set LIST=%FFMA_FILES%
-:loop
-for /f "tokens=1,*" %%a in ("%LIST%") do (
-%YASM_PARAMS% %%a
-set LIST=%%b
-goto loop
-)
-%CL_32% -DARCH_X86=1 -DARCH_X86_32=1 -DARCH_X86_64=0 -o bpgdec_x86.exe %FFMC_FILES% %FFMP_FILES% %DEC_FILES% %FFMO_FILES%
+rem %YASM_PARAMS% libavutil\x86\cpuid.asm
+rem %YASM_PARAMS% libavcodec\x86\hevc_deblock.asm
+rem %YASM_PARAMS% libavcodec\x86\hevc_idct.asm
+rem %YASM_PARAMS% libavcodec\x86\hevc_mc.asm
+rem %YASM_PARAMS% libavcodec\x86\hevc_res_add.asm
+rem %CL_32% -DARCH_X86=1 -DARCH_X86_32=1 -DARCH_X86_64=0 -o bpgdec_x86.exe %FFMC_FILES% %FFMP_FILES% %DEC_FILES% %FFMO_FILES%
 
-echo building bpgdec_x64 ...
-rem yasm -P config.asm -DARCH_X86=1 -DARCH_X86_32=0 -DARCH_X86_64=1 -I. --prefix=_ -a x86 -m amd64 -f win64 %FFMA_FILES%
-rem %CL_64% -DARCH_X86=1 -DARCH_X86_32=0 -DARCH_X86_64=1 -o bpgdec_x64.exe %FFMC_FILES% %FFMP_FILES% %DEC_FILES%
+echo building bpgdec_x64.exe ...
+set YASM_PARAMS=yasm -DARCH_X86=1 -DARCH_X86_32=0 -DARCH_X86_64=1 -I. --prefix=_ -a x86 -m amd64 -f win64 -P config.asm
+%YASM_PARAMS% libavutil\x86\cpuid.asm
+%YASM_PARAMS% libavcodec\x86\hevc_deblock.asm
+%YASM_PARAMS% libavcodec\x86\hevc_idct.asm
+%YASM_PARAMS% libavcodec\x86\hevc_mc.asm
+%YASM_PARAMS% libavcodec\x86\hevc_res_add.asm
+%CL_64% -DARCH_X86=1 -DARCH_X86_32=0 -DARCH_X86_64=1 -o bpgdec_x64.exe %FFMC_FILES% %FFMP_FILES% %DEC_FILES% %FFMO_FILES%
 
 pause
