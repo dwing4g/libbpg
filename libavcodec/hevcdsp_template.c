@@ -20,12 +20,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include <emmintrin.h>
+
+#include <tmmintrin.h>
+
+#include <smmintrin.h>
+#define _MM_CVTEPI8_EPI16 _mm_cvtepi8_epi16
+
 #include "get_bits.h"
 #include "hevc.h"
-
+#define factor 16
 #include "bit_depth_template.c"
 #include "hevcdsp.h"
-
 
 static void FUNC(put_pcm)(uint8_t *_dst, ptrdiff_t stride, int width, int height,
                           GetBitContext *gb, int pcm_bit_depth BIT_DEPTH_PARAM)
@@ -380,11 +386,78 @@ static void FUNC(sao_edge_filter)(uint8_t *_dst, uint8_t *_src,
     int pos_1_0  = pos[sao_eo_class][1][0];
     int pos_1_1  = pos[sao_eo_class][1][1];
     int x, y;
-
+__m128i x0, x1, x2, x3;
+    __m128i cmp0, cmp1, r2;
+	int yu,u;uint8_t inter[16];
     int y_stride_0_1 = (init_y + pos_0_1) * stride_src;
     int y_stride_1_1 = (init_y + pos_1_1) * stride_src;
+	yu=(width-init_x)%16;
     for (y = init_y; y < height; y++) {
-        for (x = init_x; x < width; x++) {
+        for (x = init_x; x < width-yu; x+=16) {
+				x0   = _mm_loadu_si128((__m128i *) (src + x + y_stride_src));
+                cmp0 = _mm_loadu_si128((__m128i *) (src + x + y_stride_0_1));
+                cmp1 = _mm_loadu_si128((__m128i *) (src + x + y_stride_1_1));
+                r2 = _mm_min_epu8(x0, cmp0);
+                x1 = _mm_cmpeq_epi8(cmp0, r2);
+                x2 = _mm_cmpeq_epi8(x0, r2);
+                x1 = _mm_sub_epi8(x2, x1);
+				
+                r2 = _mm_min_epu8(x0, cmp1);
+                x3 = _mm_cmpeq_epi8(cmp1, r2);
+                x2 = _mm_cmpeq_epi8(x0, r2);
+                x3 = _mm_sub_epi8(x2, x3);
+				
+                x1 = _mm_add_epi8(x1, x3);
+				x1 = _mm_add_epi8(x1, _mm_set1_epi8(2)); 
+				_mm_storeu_si128((__m128i *) (inter), x1);	
+				for(u=0;u<16;u++)
+				{
+				dst[x + y_stride_dst+u] = av_clip_pixel(src[x + y_stride_src+u]+sao_offset_val[edge_idx[inter[u]]]);
+				}
+				}
+/*				x0 = _mm_unpacklo_epi8( _mm_setzero_si128(),x0);
+				r0 = _mm_loadu_si128((__m128i *) (inter2));
+				r0 = _mm_add_epi16(r0, x0);
+				r0 = _mm_packus_epi16(r0, r0);				
+				_mm_storel_epi64((__m128i *) (dst + x + y_stride_dst), r0);		
+				r0 = _mm_loadu_si128((__m128i *) (inter2+8));
+				r0 = _mm_add_epi16(r0, x0);
+				r0 = _mm_packus_epi16(r0, r0);
+				_mm_storel_epi64((__m128i *) (dst + x + y_stride_dst+8), r0);
+				}
+*/			
+				
+	/*			yu=(width-init_x)%8;
+    for (y = init_y; y < height; y++) {
+        for (x = init_x; x < width-yu; x+=8) {
+				x0   = _mm_loadl_epi64((__m128i *) (src + x + y_stride_src));
+                cmp0 = _mm_loadl_epi64((__m128i *) (src + x + y_stride_0_1));
+                cmp1 = _mm_loadl_epi64((__m128i *) (src + x + y_stride_1_1));
+                r2 = _mm_min_epu8(x0, cmp0);
+                x1 = _mm_cmpeq_epi8(cmp0, r2);
+                x2 = _mm_cmpeq_epi8(x0, r2);
+                x1 = _mm_sub_epi8(x2, x1);
+				
+                r2 = _mm_min_epu8(x0, cmp1);
+                x3 = _mm_cmpeq_epi8(cmp1, r2);
+                x2 = _mm_cmpeq_epi8(x0, r2);
+                x3 = _mm_sub_epi8(x2, x3);
+				
+                x1 = _mm_add_epi8(x1, x3);
+				x1 = _mm_add_epi8(x1, _mm_set1_epi8(2));
+				x1 = _mm_packus_epi16(x1, x1);
+				_mm_storel_epi64((__m128i *) (inter), x1);	
+				for(u=0;u<8;u++)
+				{
+				inter2[u]=sao_offset_val[edge_idx[inter[u]]];
+				}
+				r0 = _mm_loadu_si128((__m128i *) (inter2));
+				x0 = _mm_unpacklo_epi8(x0, _mm_setzero_si128());
+				r0 = _mm_add_epi16(r0, x0);
+				r0 = _mm_packus_epi16(r0, r0);
+				_mm_storel_epi64((__m128i *) (dst + x + y_stride_dst), r0);						
+				}*/
+		for (x = width-yu; x < width; x++) {
             int diff0             = CMP(src[x + y_stride_src], src[x + pos_0_0 + y_stride_0_1]);
             int diff1             = CMP(src[x + y_stride_src], src[x + pos_1_0 + y_stride_1_1]);
             int offset_val        = edge_idx[2 + diff0 + diff1];

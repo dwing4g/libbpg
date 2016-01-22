@@ -89,7 +89,7 @@
 
 #define FUNC3(a, b, c)  a ## _ ## b ## c
 #define FUNC2(a, b, c)  FUNC3(a, b, c)
-#ifdef USE_VAR_BIT_DEPTH
+#if 0 //d def USE_VAR_BIT_DEPTH
 #define FUNC(a)  FUNC2(a, var,)
 #define FUNCC(a) FUNC2(a, var, _c)
 #else

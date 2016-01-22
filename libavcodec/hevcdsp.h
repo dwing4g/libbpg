@@ -29,7 +29,7 @@
 
 #define MAX_PB_SIZE 64
 
-#ifdef USE_VAR_BIT_DEPTH
+#if 0 //d def USE_VAR_BIT_DEPTH
 #define BIT_DEPTH_PARAM ,int bit_depth
 #define BIT_DEPTH_ARG , bit_depth
 #define BIT_DEPTH_ARG2(x) , x

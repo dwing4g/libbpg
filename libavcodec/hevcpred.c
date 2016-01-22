@@ -24,14 +24,14 @@
 
 #include "hevcpred.h"
 
-#if defined(USE_FULL)
+#if 1 //d defined(USE_FULL)
 #define HEVC_INLINE av_always_inline
 #else
 /* Note: slower but smaller */
 #define HEVC_INLINE av_noinline
 #endif
 
-#ifdef USE_VAR_BIT_DEPTH
+#if 0 //d def USE_VAR_BIT_DEPTH
 
 #define BIT_DEPTH bit_depth
 #include "hevcpred_template.c"
@@ -43,7 +43,7 @@
 #include "hevcpred_template.c"
 #undef BIT_DEPTH
 
-#ifdef USE_FULL
+#if 1 //d def USE_FULL
 #define BIT_DEPTH 9
 #include "hevcpred_template.c"
 #undef BIT_DEPTH
@@ -80,11 +80,11 @@ void ff_hevc_pred_init(HEVCPredContext *hpc, int bit_depth)
     hpc->pred_angular[2] = FUNC(pred_angular_2, depth); \
     hpc->pred_angular[3] = FUNC(pred_angular_3, depth);
 
-#ifdef USE_VAR_BIT_DEPTH
+#if 0 //d def USE_VAR_BIT_DEPTH
     HEVC_PRED(var);
 #else
     switch (bit_depth) {
-#ifdef USE_FULL
+#if 1 //d def USE_FULL
     case 9:
         HEVC_PRED(9);
         break;

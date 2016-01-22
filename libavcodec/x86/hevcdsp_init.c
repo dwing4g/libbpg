@@ -702,12 +702,12 @@ void ff_hevc_dsp_init_x86(HEVCDSPContext *c, const int bit_depth)
     int cpu_flags = av_get_cpu_flags();
 
     if (bit_depth == 8) {
-        if (EXTERNAL_MMXEXT(cpu_flags)) {
-            //d c->idct_dc[0] = ff_hevc_idct4x4_dc_8_mmxext; //d amd black
-            c->idct_dc[1] = ff_hevc_idct8x8_dc_8_mmxext; //d amd OK
-            //d c->transform_add[0]    =  ff_hevc_transform_add4_8_mmxext; //d amd black
+        if (EXTERNAL_MMXEXT(cpu_flags) && ARCH_X86_64) { //d bad on X32
+            c->idct_dc[0] = ff_hevc_idct4x4_dc_8_mmxext; //d black on amd
+            c->idct_dc[1] = ff_hevc_idct8x8_dc_8_mmxext;
+            c->transform_add[0]    =  ff_hevc_transform_add4_8_mmxext; //d black on amd
         }
-        if (EXTERNAL_SSE2(cpu_flags)) {
+        if (EXTERNAL_SSE2(cpu_flags) && ARCH_X86_64) { //d bad on 32bit
             c->hevc_v_loop_filter_chroma = ff_hevc_v_loop_filter_chroma_8_sse2;
             c->hevc_h_loop_filter_chroma = ff_hevc_h_loop_filter_chroma_8_sse2;
             if (ARCH_X86_64) {
@@ -744,7 +744,7 @@ void ff_hevc_dsp_init_x86(HEVCDSPContext *c, const int bit_depth)
             QPEL_LINKS(c->put_hevc_qpel, 1, 0, qpel_v,     8, sse4);
             QPEL_LINKS(c->put_hevc_qpel, 1, 1, qpel_hv,    8, sse4);
         }
-        if (EXTERNAL_AVX(cpu_flags)) {
+        if (EXTERNAL_AVX(cpu_flags) && ARCH_X86_64) { //d bad on 32bit
             c->hevc_v_loop_filter_chroma = ff_hevc_v_loop_filter_chroma_8_avx;
             c->hevc_h_loop_filter_chroma = ff_hevc_h_loop_filter_chroma_8_avx;
             if (ARCH_X86_64) {
@@ -757,7 +757,7 @@ void ff_hevc_dsp_init_x86(HEVCDSPContext *c, const int bit_depth)
             c->transform_add[2]    = ff_hevc_transform_add16_8_avx;
             c->transform_add[3]    = ff_hevc_transform_add32_8_avx;
         }
-        if (EXTERNAL_AVX2(cpu_flags)) {
+        if (EXTERNAL_AVX2(cpu_flags) && ARCH_X86_64) { //d bad on 32bit
             c->idct_dc[2] = ff_hevc_idct16x16_dc_8_avx2;
             c->idct_dc[3] = ff_hevc_idct32x32_dc_8_avx2;
             if (ARCH_X86_64) {
