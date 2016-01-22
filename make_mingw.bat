@@ -50,29 +50,29 @@ set DEC_FILES= ^
     libbpg.c ^
     bpgdec.c
 
-set CL_FLAGS=-DHAVE_AV_CONFIG_H -DCONFIG_BPG_VERSION=\^"0.9.6-dwing\^" -D__USE_MINGW_ANSI_STDIO=1 -I. -Ofast -ffast-math -fweb -fomit-frame-pointer -fmerge-all-constants -pipe -static -s
+set CL_FLAGS=-DHAVE_AV_CONFIG_H -D__USE_MINGW_ANSI_STDIO=1 -I. -Ofast -ffast-math -fweb -fomit-frame-pointer -fmerge-all-constants -pipe -static -s
 set CL_32=i686-w64-mingw32-gcc.exe -m32 -march=i686 %CL_FLAGS% -flto -fwhole-program
-set CL_64=x86_64-w64-mingw32-gcc.exe -m64 %CL_FLAGS%
+set CL_64=x86_64-w64-mingw32-gcc.exe -m64 %CL_FLAGS% -flto -fwhole-program
 
 echo building bpgdec.exe ...
-rem %CL_32% -DARCH_X86=0 -DARCH_X86_32=0 -DARCH_X86_64=0 -o bpgdec.exe %FFMC_FILES% %DEC_FILES%
+%CL_32% -DARCH_X86=0 -DARCH_X86_32=0 -DARCH_X86_64=0 -DCONFIG_BPG_VERSION=\^"0.9.6-dwing\^" -o bpgdec.exe %FFMC_FILES% %DEC_FILES%
 
 echo building bpgdec_x86.exe ...
 set YASM_PARAMS=yasm -DARCH_X86=1 -DARCH_X86_32=1 -DARCH_X86_64=0 -I. --prefix=_ -a x86 -m x86 -f win32 -P config.asm
-rem %YASM_PARAMS% libavutil\x86\cpuid.asm
-rem %YASM_PARAMS% libavcodec\x86\hevc_deblock.asm
-rem %YASM_PARAMS% libavcodec\x86\hevc_idct.asm
-rem %YASM_PARAMS% libavcodec\x86\hevc_mc.asm
-rem %YASM_PARAMS% libavcodec\x86\hevc_res_add.asm
-rem %CL_32% -DARCH_X86=1 -DARCH_X86_32=1 -DARCH_X86_64=0 -o bpgdec_x86.exe %FFMC_FILES% %FFMP_FILES% %DEC_FILES% %FFMO_FILES%
-
-echo building bpgdec_x64.exe ...
-set YASM_PARAMS=yasm -DARCH_X86=1 -DARCH_X86_32=0 -DARCH_X86_64=1 -I. --prefix=_ -a x86 -m amd64 -f win64 -P config.asm
 %YASM_PARAMS% libavutil\x86\cpuid.asm
 %YASM_PARAMS% libavcodec\x86\hevc_deblock.asm
 %YASM_PARAMS% libavcodec\x86\hevc_idct.asm
 %YASM_PARAMS% libavcodec\x86\hevc_mc.asm
 %YASM_PARAMS% libavcodec\x86\hevc_res_add.asm
-%CL_64% -DARCH_X86=1 -DARCH_X86_32=0 -DARCH_X86_64=1 -o bpgdec_x64.exe %FFMC_FILES% %FFMP_FILES% %DEC_FILES% %FFMO_FILES%
+%CL_32% -DARCH_X86=1 -DARCH_X86_32=1 -DARCH_X86_64=0 -DCONFIG_BPG_VERSION=\^"0.9.6-dwing-x86\^" -o bpgdec_x86.exe %FFMC_FILES% %FFMP_FILES% %DEC_FILES% %FFMO_FILES%
+
+echo building bpgdec_x64.exe ...
+set YASM_PARAMS=yasm -DARCH_X86=1 -DARCH_X86_32=0 -DARCH_X86_64=1 -I. -a x86 -m amd64 -f win64 -P config.asm
+%YASM_PARAMS% libavutil\x86\cpuid.asm
+%YASM_PARAMS% libavcodec\x86\hevc_deblock.asm
+%YASM_PARAMS% libavcodec\x86\hevc_idct.asm
+%YASM_PARAMS% libavcodec\x86\hevc_mc.asm
+%YASM_PARAMS% libavcodec\x86\hevc_res_add.asm
+%CL_64% -DARCH_X86=1 -DARCH_X86_32=0 -DARCH_X86_64=1 -DCONFIG_BPG_VERSION=\^"0.9.6-dwing-x64\^" -o bpgdec_x64.exe %FFMC_FILES% %FFMP_FILES% %DEC_FILES% %FFMO_FILES%
 
 pause

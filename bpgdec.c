@@ -259,8 +259,9 @@ static void help(void)
     printf("BPG Image Decoder version " CONFIG_BPG_VERSION "\n"
            "usage: bpgdec [options] infile\n"
            "Options:\n"
-           "-o outfile.[ppm|png]   set the output filename (default = out.png)\n"
-           "-b bit_depth           PNG output only: use bit_depth per component (8 or 16, default = 8)\n"
+//d        "-o outfile.[ppm|png]   set the output filename (default = out.png)\n"
+           "-o outfile.[ppm]       set the output filename (default = out.ppm)\n"
+//d        "-b bit_depth           PNG output only: use bit_depth per component (8 or 16, default = 8)\n"
            "-i                     display information about the image\n");
     exit(1);
 }
@@ -273,7 +274,7 @@ int main(int argc, char **argv)
     int buf_len, bit_depth, c, show_info;
     const char *outfilename, *filename, *p;
     
-    outfilename = "out.png";
+    outfilename = "out.ppm"; //d png
     bit_depth = 8;
     show_info = 0;
     for(;;) {
